@@ -10,6 +10,9 @@
 # Java class files
 *.class
 
+# Api
+.app/src/main/java/kr/ryan/tensorflowwithimage/util/api.kt
+
 # Generated files
 bin/
 gen/
