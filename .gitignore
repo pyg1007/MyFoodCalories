@@ -11,7 +11,7 @@
 *.class
 
 # Api
-.app/src/main/java/kr/ryan/tensorflowwithimage/util/api.kt
+/app/src/main/java/kr/ryan/tensorflowwithimage/util/api.kt
 
 # Generated files
 bin/
