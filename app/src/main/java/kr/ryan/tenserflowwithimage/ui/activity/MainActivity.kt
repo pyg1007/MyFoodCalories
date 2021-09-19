@@ -71,7 +71,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 httpViewModel.uiStatus.collect {
                     when (it) {
                         is UiStatus.None -> {
-                            binding.ivCaptureButton.visibility = View.VISIBLE
+                            //binding.ivCaptureButton.visibility = View.VISIBLE
                         }
                         is UiStatus.Error -> {
                             Log.e(TAG, "Error ${it.value}")
@@ -80,8 +80,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                             httpViewModel.clearEvent()
                         }
                         is UiStatus.Success -> {
-                            binding.ivCaptureButton.visibility = View.INVISIBLE
-                            Glide.with(this@MainActivity).load(BASE_URL.plus("result/" + it.value)).error(R.drawable.loading).into(binding.ivCaptureImage)
+//                            binding.ivCaptureButton.visibility = View.INVISIBLE
+//                            Glide.with(this@MainActivity).load(BASE_URL.plus("result/" + it.value)).error(R.drawable.loading).into(binding.ivCaptureImage)
                             dismissDialog()
                         }
                         is UiStatus.Loading -> {
@@ -97,18 +97,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     }
 
-    override fun onStop() {
-        super.onStop()
-        httpViewModel.clearEvent()
-    }
-
-    override fun onBackPressed() {
-        if (binding.ivCaptureImage.visibility == View.INVISIBLE) httpViewModel.clearEvent()
-        else super.onBackPressed()
-    }
-
     private fun takeCapture() {
-        binding.ivCaptureButton.setOnClickListener {
+        binding.ivFoodImage.setOnClickListener {
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { pictureIntent ->
                 pictureIntent.resolveActivity(packageManager)?.also {
                     imageFile = runCatching {
@@ -134,6 +124,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             val mediaFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_NAME)
             if (!mediaFile.exists() and !mediaFile.mkdirs()) {
                 Log.e(TAG, "Fail Create File")
+                return null
             }
 
             File(mediaFile.path + File.separator + CAPTURE_IMAGE_NAME)
