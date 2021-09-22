@@ -23,6 +23,7 @@ import kr.ryan.mycalories.data.UiStatus
 import kr.ryan.mycalories.databinding.ActivityMainBinding
 import kr.ryan.mycalories.repository.HttpRepository
 import kr.ryan.mycalories.retrofit.Client
+import kr.ryan.mycalories.retrofit.MachineLeaningClient
 import kr.ryan.mycalories.retrofit.NetWorkClient
 import kr.ryan.mycalories.ui.dialog.LoadingDialogFragment
 import kr.ryan.mycalories.usecase.HttpConnectionUseCase
@@ -44,11 +45,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         LoadingDialogFragment.newInstance()
     }
 
-     val httpViewModel by viewModels<HttpViewModel> {
-        HttpViewModelFactory(
-            HttpConnectionUseCase(HttpRepository())
-        )
-    }
+//    val httpViewModel by viewModels<HttpViewModel> {
+//        HttpViewModelFactory(
+//            HttpConnectionUseCase(HttpRepository())
+//        )
+//    }
 
     init {
         lifecycleScope.launch {
@@ -64,7 +65,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                                         file.name,
                                         file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
                                     )
-                                    httpViewModel.sendImage(body)
+                                   // httpViewModel.sendImage(body)
                                 }
                             }
                         }
@@ -76,28 +77,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                httpViewModel.uiStatus.collect {
-                    when (it) {
-                        is UiStatus.None -> {
-                            //binding.ivCaptureButton.visibility = View.VISIBLE
-                        }
-                        is UiStatus.Error -> {
-                            Log.e(TAG, "Error ${it.value}")
-                            dismissDialog()
-                            showShortToast(it.value)
-                            httpViewModel.clearEvent()
-                        }
-                        is UiStatus.Success -> {
-//                            binding.ivCaptureButton.visibility = View.INVISIBLE
-//                            Glide.with(this@MainActivity).load(BASE_URL.plus("result/" + it.value)).error(R.drawable.loading).into(binding.ivCaptureImage)
-                            dismissDialog()
-                        }
-                        is UiStatus.Loading -> {
-                            Log.e(TAG, "Loading")
-                            showDialog()
-                        }
-                    }
-                }
+//                httpViewModel.uiStatus.collect {
+//                    when (it) {
+//                        is UiStatus.None -> {
+//                            //binding.ivCaptureButton.visibility = View.VISIBLE
+//                        }
+//                        is UiStatus.Error -> {
+//                            Log.e(TAG, "Error ${it.value}")
+//                            dismissDialog()
+//                            showShortToast(it.value)
+//                            httpViewModel.clearEvent()
+//                        }
+//                        is UiStatus.Success -> {
+////                            binding.ivCaptureButton.visibility = View.INVISIBLE
+////                            Glide.with(this@MainActivity).load(BASE_URL.plus("result/" + it.value)).error(R.drawable.loading).into(binding.ivCaptureImage)
+//                            dismissDialog()
+//                        }
+//                        is UiStatus.Loading -> {
+//                            Log.e(TAG, "Loading")
+//                            showDialog()
+//                        }
+//                    }
+//                }
 
             }
 
