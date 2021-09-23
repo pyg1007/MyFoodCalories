@@ -9,6 +9,7 @@ package kr.ryan.retrofitmodule
  */
 sealed class NetWorkResult<T>{
 
+    class Init<T> : NetWorkResult<T>()
     class Success<T>(val data: T, val code: Int) : NetWorkResult<T>()
     class Loading<T> : NetWorkResult<T>()
     class ApiError<T>(val message: String, val code: Int) : NetWorkResult<T>()

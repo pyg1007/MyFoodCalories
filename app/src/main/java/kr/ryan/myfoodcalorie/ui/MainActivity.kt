@@ -1,4 +1,4 @@
-package kr.ryan.myfoodcalorie
+package kr.ryan.myfoodcalorie.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kr.ryan.myfoodcalorie.R
 import kr.ryan.myfoodcalorie.viewmodel.GitHubViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
 import timber.log.Timber
@@ -24,6 +25,9 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             gitHubViewModel.netWorkResult.collect { result ->
                 when(result){
+                    is NetWorkResult.Init -> {
+                        showLogMessage("Init")
+                    }
                     is NetWorkResult.Success -> {
                         result.data.also {
                             showLogMessage("${it.date} ${it.id} ${it.date} ${it.url}")

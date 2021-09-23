@@ -24,12 +24,13 @@ class GitHubViewModel @Inject constructor(
     private val useCase: GetGitHubUseCase
 ) : ViewModel() {
 
-    private val _netWorkResult = MutableStateFlow<NetWorkResult<RemoteGitHub>>(NetWorkResult.Loading())
+    private val _netWorkResult = MutableStateFlow<NetWorkResult<RemoteGitHub>>(NetWorkResult.Init())
     val netWorkResult = _netWorkResult.asStateFlow()
 
     init {
 
         CoroutineScope(Dispatchers.Main).launch {
+            _netWorkResult.emit(NetWorkResult.Loading())
             _netWorkResult.emit(useCase.getGitHubInformation("pyg1007"))
         }
 
