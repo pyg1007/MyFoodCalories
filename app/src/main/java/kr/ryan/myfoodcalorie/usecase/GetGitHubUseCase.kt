@@ -17,8 +17,8 @@ class GetGitHubUseCase @Inject constructor(
     private val repository: GitHubRepository
 ) {
 
-    suspend fun getGitHubInformation() : NetWorkResult<RemoteGitHub> {
-        return repository.getGitHubRepository()
+    suspend fun getGitHubInformation(owner: String) : NetWorkResult<RemoteGitHub> {
+        return repository.getGitHubRepository(owner)
     }
 
 }

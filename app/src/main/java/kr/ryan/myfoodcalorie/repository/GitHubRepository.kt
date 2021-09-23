@@ -1,6 +1,7 @@
 package kr.ryan.myfoodcalorie.repository
 
 import androidx.annotation.WorkerThread
+import dagger.assisted.Assisted
 import kr.ryan.myfoodcalorie.data.RemoteGitHub
 import kr.ryan.myfoodcalorie.retrofit.GitHubService
 import kr.ryan.retrofitmodule.NetWorkResult
@@ -18,8 +19,8 @@ class GitHubRepository @Inject constructor(
 ) {
 
     @WorkerThread
-    suspend fun getGitHubRepository() : NetWorkResult<RemoteGitHub>{
-        return service.getGitHubRepos("pyg1007")
+    suspend fun getGitHubRepository(owner: String) : NetWorkResult<RemoteGitHub>{
+        return service.getGitHubRepos(owner)
     }
 
 }

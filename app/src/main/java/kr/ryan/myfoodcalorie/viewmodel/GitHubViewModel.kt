@@ -30,7 +30,7 @@ class GitHubViewModel @Inject constructor(
     init {
 
         CoroutineScope(Dispatchers.Main).launch {
-            _netWorkResult.emit(useCase.getGitHubInformation())
+            _netWorkResult.emit(useCase.getGitHubInformation("pyg1007"))
         }
 
     }
