@@ -1,4 +1,3 @@
 /build
 
-# Api
-/src/main/java/kr/ryan/tensorflowwithimage/util/api.kt
+/src/main/java/kr/ryan/myfoodcalorie/util/api.kt

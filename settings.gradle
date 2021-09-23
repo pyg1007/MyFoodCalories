@@ -6,6 +6,6 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "MyFoodCalories"
+rootProject.name = "MyFoodCalorie"
 include ':app'
-include ':baseUI'
+include ':RetrofitModule'
