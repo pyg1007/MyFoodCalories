@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidProject/MyFoodCalories/app/src/main/res/layout/activity_main.xml" value="0.14221014492753623" />
         <entry key="..\:/AndroidProject/MyFoodCalories/app/src/main/res/layout/activity_splash.xml" value="0.20520833333333333" />
+        <entry key="..\:/AndroidProject/MyFoodCalories/app/src/main/res/layout/include_food_info.xml" value="0.14221014492753623" />
       </map>
     </option>
   </component>
