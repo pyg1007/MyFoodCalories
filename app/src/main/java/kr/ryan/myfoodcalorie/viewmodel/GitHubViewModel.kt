@@ -28,11 +28,11 @@ class GitHubViewModel @Inject constructor(
     val netWorkResult = _netWorkResult.asStateFlow()
 
     init {
-
-        CoroutineScope(Dispatchers.Main).launch {
-            _netWorkResult.emit(NetWorkResult.Loading())
-            _netWorkResult.emit(useCase.getGitHubInformation("pyg1007"))
-        }
+//
+//        CoroutineScope(Dispatchers.Main).launch {
+//            _netWorkResult.emit(NetWorkResult.Loading())
+//            _netWorkResult.emit(useCase.getGitHubInformation("pyg1007"))
+//        }
 
     }
 }

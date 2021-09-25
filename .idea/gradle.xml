@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/RetrofitModule" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/baseUI" />
+            <option value="$PROJECT_DIR$/tedPermissionModule" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

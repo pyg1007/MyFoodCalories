@@ -10,3 +10,4 @@ rootProject.name = "MyFoodCalorie"
 include ':app'
 include ':RetrofitModule'
 include ':baseUI'
+include ':tedPermissionModule'
