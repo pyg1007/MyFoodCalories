@@ -23,6 +23,7 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(R.layout.activity_spl
                 delay(1 * 1000L)
                 Intent(this@SplashActivity, MainActivity::class.java).also {
                     startActivity(it)
+                    finish()
                 }
 
             }

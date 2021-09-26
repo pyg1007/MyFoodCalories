@@ -3,6 +3,7 @@ package kr.ryan.myfoodcalorie.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.whenCreated
+import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import gun0912.tedbottompicker.TedRxBottomPicker
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +22,6 @@ import kr.ryan.baseui.BaseActivity
 import kr.ryan.myfoodcalorie.R
 import kr.ryan.myfoodcalorie.databinding.ActivityMainBinding
 import kr.ryan.myfoodcalorie.viewmodel.GitHubViewModel
-import kr.ryan.retrofitmodule.NetWorkResult
 import kr.ryan.tedpermissionmodule.requireTedPermission
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -91,6 +92,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     TedRxBottomPicker.with(this@MainActivity)
                         .show()
                         .subscribe({ uri ->
+                            showFoodImage(uri)
                             Timber.d(uri.toString())
                         }, Throwable::printStackTrace)
                 }, {
@@ -99,6 +101,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
             }
         }
+    }
+
+    private fun showFoodImage(uri: Uri) = CoroutineScope(Dispatchers.Main).launch {
+        Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
 
 
