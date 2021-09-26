@@ -8,7 +8,8 @@ package kr.ryan.myfoodcalorie.data
  * Description:
  */
 data class RemoteMachineLeaning(
-    val name: String,
-    val people: String,
-    val calorie: String
+    val code: Int,
+    val name: String?,
+    val people: String?,
+    val calorie: String?
 )
