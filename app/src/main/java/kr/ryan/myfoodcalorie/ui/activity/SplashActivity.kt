@@ -1,4 +1,4 @@
-package kr.ryan.myfoodcalorie.ui
+package kr.ryan.myfoodcalorie.ui.activity
 
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +17,6 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(R.layout.activity_spl
 
         lifecycleScope.launch {
 
-
             whenCreated {
 
                 delay(1 * 1000L)
@@ -27,7 +26,6 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(R.layout.activity_spl
                 }
 
             }
-
 
         }
 

@@ -14,6 +14,7 @@ buildscript {
     ext.tedpermission_version = '3.2.3'
     ext.exifinterface_version = '1.3.3'
     ext.gilde_version = '4.12.0'
+    ext.window_manager_version = '1.0.0-beta02'
 
     repositories {
         google()

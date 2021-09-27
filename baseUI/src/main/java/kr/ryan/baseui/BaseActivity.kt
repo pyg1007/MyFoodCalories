@@ -13,6 +13,7 @@ import androidx.databinding.ViewDataBinding
  * Created On 2021-09-24.
  * Description:
  */
+
 abstract class BaseActivity<VDB: ViewDataBinding>(@LayoutRes private val layoutRes: Int): AppCompatActivity() {
 
     protected lateinit var binding: VDB

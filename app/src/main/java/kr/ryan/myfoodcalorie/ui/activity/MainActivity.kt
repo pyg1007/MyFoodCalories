@@ -1,12 +1,10 @@
-package kr.ryan.myfoodcalorie.ui
+package kr.ryan.myfoodcalorie.ui.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,8 +20,8 @@ import kotlinx.coroutines.launch
 import kr.ryan.baseui.BaseActivity
 import kr.ryan.myfoodcalorie.R
 import kr.ryan.myfoodcalorie.databinding.ActivityMainBinding
+import kr.ryan.myfoodcalorie.ui.dialogfragment.LoadingDialogFragment
 import kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel
-import kr.ryan.myfoodcalorie.viewmodel.GitHubViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
 import kr.ryan.tedpermissionmodule.requireTedPermission
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -79,9 +77,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         .show()
                         .subscribe({ uri ->
                             uriToFile(uri)?.let {
-//                                fileToMultipartBody(it)?.let {body->
-//                                    foodImageMachineLeaningViewModel.requestMachineLeaning(body)
-//                                }
+                                fileToMultipartBody(it)?.let {body->
+                                    foodImageMachineLeaningViewModel.requestMachineLeaning(body)
+                                }
                                 showFoodImage(it)
                                 Timber.d(it.toString())
                             }
@@ -94,15 +92,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun uriToFile(uri: Uri): File?{
+    private fun uriToFile(uri: Uri): File? {
         return runCatching {
             File(uri.path.toString())
         }.getOrNull()
     }
 
-    private fun fileToMultipartBody(file: File): MultipartBody.Part?{
+    private fun fileToMultipartBody(file: File): MultipartBody.Part? {
         return runCatching {
-            MultipartBody.Part.createFormData("image", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull()))
+            MultipartBody.Part.createFormData(
+                "image",
+                file.name,
+                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            )
         }.getOrNull()
     }
 
@@ -110,17 +112,48 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
 
-    private suspend fun observeNetWorkResult(){
+    private suspend fun observeNetWorkResult() {
         foodImageMachineLeaningViewModel.networkStatus.collect {
-            when(it){
-                is NetWorkResult.Loading -> {}
-                is NetWorkResult.ApiError -> {}
-                is NetWorkResult.NetWorkError -> {}
-                is NetWorkResult.NullResult -> {}
-                is NetWorkResult.Success -> {}
-                else -> {}
+            when (it) {
+                is NetWorkResult.Loading -> {
+                    showLoadingDialog()
+                }
+                is NetWorkResult.ApiError -> {
+                    dismissLoadingDialog()
+                    showToastMessage(it.code, it.message)
+                }
+                is NetWorkResult.NetWorkError -> {
+                    dismissLoadingDialog()
+                    showToastMessage(it.throwable.message.toString())
+                }
+                is NetWorkResult.NullResult -> {
+                    dismissLoadingDialog()
+                    showToastMessage("Result is Null")
+                }
+                is NetWorkResult.Success -> {
+                    dismissLoadingDialog()
+                }
+                else -> {
+                }
             }
         }
+    }
+
+    private fun showLoadingDialog() {
+        LoadingDialogFragment.newInstance().show(supportFragmentManager, "Loading")
+    }
+
+    private fun dismissLoadingDialog() {
+        (supportFragmentManager.findFragmentByTag("Loading") as? LoadingDialogFragment)?.dismiss()
+    }
+
+    private fun showToastMessage(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showToastMessage(code: Int, message: String) {
+        Toast.makeText(applicationContext, "Error Code: $code Cause: $message", Toast.LENGTH_SHORT)
+            .show()
     }
 
     private fun showLogMessage(message: String) {
