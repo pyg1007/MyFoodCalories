@@ -12,10 +12,8 @@
     </style>
 
     <style name="SplashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryDark">@color/purple_700</item>
-        <item name="colorAccent">@color/teal_200</item>
-        <item name="android:statusBarColor">@color/teal_200</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/loading</item>
+        <item name="android:windowSplashScreenBackground">@drawable/splash_gradient</item>
+        <item name="android:windowSplashScreenAnimationDuration">1000</item>
     </style>
 </resources>

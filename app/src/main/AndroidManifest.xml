@@ -18,7 +18,8 @@
         android:theme="@style/Theme.MyFoodCalorie">
         <activity
             android:name=".ui.activity.SplashActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

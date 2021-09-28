@@ -1,6 +1,7 @@
 package kr.ryan.myfoodcalorie.ui.activity
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import dagger.hilt.android.AndroidEntryPoint
@@ -11,7 +12,7 @@ import kr.ryan.myfoodcalorie.R
 import kr.ryan.myfoodcalorie.databinding.ActivitySplashBinding
 
 @AndroidEntryPoint
-class SplashActivity : BaseActivity<ActivitySplashBinding>(R.layout.activity_splash) {
+class SplashActivity : AppCompatActivity() {
 
     init {
 
@@ -19,7 +20,6 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>(R.layout.activity_spl
 
             whenCreated {
 
-                delay(1 * 1000L)
                 Intent(this@SplashActivity, MainActivity::class.java).also {
                     startActivity(it)
                     finish()
