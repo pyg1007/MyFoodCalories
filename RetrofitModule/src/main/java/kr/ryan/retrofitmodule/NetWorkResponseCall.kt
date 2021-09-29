@@ -1,10 +1,12 @@
 package kr.ryan.retrofitmodule
 
+import android.util.Log
 import okhttp3.Request
 import okio.Timeout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 /**
  * MyFoodCalorie
@@ -26,6 +28,7 @@ class NetWorkResponseCall<T> constructor(
             call: Call<T>,
             response: Response<T>
         ) {
+            Timber.e("${response.body()}")
             response.body()?.let {
                 when(response.code()){
                     in 200..299 -> callback.onResponse(this@NetWorkResponseCall, Response.success(NetWorkResult.Success(it, response.code())))

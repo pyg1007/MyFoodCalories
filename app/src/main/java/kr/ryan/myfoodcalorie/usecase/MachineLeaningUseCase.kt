@@ -1,6 +1,6 @@
 package kr.ryan.myfoodcalorie.usecase
 
-import kr.ryan.myfoodcalorie.data.RemoteMachineLeaning
+import kr.ryan.myfoodcalorie.data.RootRemoteMachineLeaning
 import kr.ryan.myfoodcalorie.repository.MachineLeaningRepository
 import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MultipartBody
@@ -18,7 +18,7 @@ class MachineLeaningUseCase @Inject constructor(
     private val repository: MachineLeaningRepository
 ){
 
-    suspend fun provideMachineLeaningResult(param: MultipartBody.Part) : NetWorkResult<RemoteMachineLeaning>
+    suspend fun provideMachineLeaningResult(param: MultipartBody.Part) : NetWorkResult<RootRemoteMachineLeaning>
        = repository.provideMachineLeaningResult(param)
 
 

@@ -1,6 +1,6 @@
 package kr.ryan.myfoodcalorie.retrofit
 
-import kr.ryan.myfoodcalorie.data.RemoteMachineLeaning
+import kr.ryan.myfoodcalorie.data.RootRemoteMachineLeaning
 import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MultipartBody
 import retrofit2.http.Multipart
@@ -17,7 +17,7 @@ import retrofit2.http.Part
 interface MachineLeaningService {
 
     @Multipart
-    @POST("api/test")
-    suspend fun machineLeaning(@Part param: MultipartBody.Part): NetWorkResult<RemoteMachineLeaning>
+    @POST("predict")
+    suspend fun machineLeaning(@Part param: MultipartBody.Part): NetWorkResult<RootRemoteMachineLeaning>
 
 }

@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kr.ryan.myfoodcalorie.data.RemoteMachineLeaning
+import kr.ryan.myfoodcalorie.data.RootRemoteMachineLeaning
 import kr.ryan.myfoodcalorie.usecase.MachineLeaningUseCase
 import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MultipartBody
@@ -34,7 +34,7 @@ class FoodImageMachineLeaningViewModel @Inject constructor(
     private val _foodCalorie = MutableStateFlow<String?>(null)
     val foodCalorie = _foodCalorie.asStateFlow()
 
-    private val _networkStatus = MutableStateFlow<NetWorkResult<RemoteMachineLeaning>>(NetWorkResult.Init())
+    private val _networkStatus = MutableStateFlow<NetWorkResult<RootRemoteMachineLeaning>>(NetWorkResult.Init())
     val networkStatus = _networkStatus.asStateFlow()
 
     fun requestMachineLeaning(param: MultipartBody.Part) = viewModelScope.launch{

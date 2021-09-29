@@ -29,6 +29,7 @@ object MachineLeaningRetrofitModule {
             .baseUrl(MACHINE_LEANING_BASE_URL)
             .addCallAdapterFactory(ResponseAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
             .build()
             .create(MachineLeaningService::class.java)
     }

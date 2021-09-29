@@ -1,7 +1,7 @@
 package kr.ryan.myfoodcalorie.repository
 
 import androidx.annotation.WorkerThread
-import kr.ryan.myfoodcalorie.data.RemoteMachineLeaning
+import kr.ryan.myfoodcalorie.data.RootRemoteMachineLeaning
 import kr.ryan.myfoodcalorie.retrofit.MachineLeaningService
 import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MultipartBody
@@ -19,7 +19,7 @@ class MachineLeaningRepository @Inject constructor(
 ) {
 
     @WorkerThread
-    suspend fun provideMachineLeaningResult(param: MultipartBody.Part) : NetWorkResult<RemoteMachineLeaning>
+    suspend fun provideMachineLeaningResult(param: MultipartBody.Part) : NetWorkResult<RootRemoteMachineLeaning>
        = machineLeaningService.machineLeaning(param)
 
 
