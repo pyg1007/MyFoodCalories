@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel" />
+
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -24,6 +31,7 @@
         <include
             android:id="@+id/include_food_name"
             layout="@layout/include_food_info"
+            android:visibility="invisible"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@id/include_food_people"
@@ -38,6 +46,7 @@
             layout="@layout/include_food_info"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@id/include_food_calorie"
             app:layout_constraintHeight_percent="0.15"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -50,6 +59,7 @@
             layout="@layout/include_food_info"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.15"
             app:layout_constraintLeft_toLeftOf="parent"

@@ -69,6 +69,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         lifecycleScope.launch {
 
             whenCreated {
+                initBinding()
                 selectImage()
             }
 
@@ -78,6 +79,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
             }
 
+        }
+    }
+
+    private fun initBinding(){
+        binding.apply {
+            viewModel = foodImageMachineLeaningViewModel
+            lifecycleOwner = this@MainActivity
         }
     }
 

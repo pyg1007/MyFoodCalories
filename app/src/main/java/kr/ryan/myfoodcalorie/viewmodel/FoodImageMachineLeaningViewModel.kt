@@ -25,13 +25,13 @@ class FoodImageMachineLeaningViewModel @Inject constructor(
     private val machineLeaningUseCase: MachineLeaningUseCase
 ) : ViewModel() {
 
-    private val _foodTitle = MutableStateFlow<String?>(null)
+    private val _foodTitle = MutableStateFlow("")
     val foodTitle = _foodTitle.asStateFlow()
 
-    private val _foodPeople = MutableStateFlow<String?>(null)
+    private val _foodPeople = MutableStateFlow("")
     val foodPeople = _foodPeople.asStateFlow()
 
-    private val _foodCalorie = MutableStateFlow<String?>(null)
+    private val _foodCalorie = MutableStateFlow("")
     val foodCalorie = _foodCalorie.asStateFlow()
 
     private val _networkStatus = MutableStateFlow<NetWorkResult<RootRemoteMachineLeaning>>(NetWorkResult.Init())
@@ -41,6 +41,18 @@ class FoodImageMachineLeaningViewModel @Inject constructor(
         _networkStatus.emit(NetWorkResult.Loading())
         val result = machineLeaningUseCase.provideMachineLeaningResult(param)
         _networkStatus.emit(result)
+    }
+
+    fun changeFoodTitle(title: String) = viewModelScope.launch {
+        _foodTitle.emit(title)
+    }
+
+    fun changeFoodPeople(people: String) = viewModelScope.launch {
+        _foodPeople.emit(people)
+    }
+
+    fun changeFoodCalorie(calorie: String) = viewModelScope.launch {
+        _foodCalorie.emit(calorie)
     }
 
 }
