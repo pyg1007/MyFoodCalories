@@ -21,52 +21,48 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:src="@drawable/add"
-            app:layout_constraintBottom_toTopOf="@id/include_food_name"
+            app:layout_constraintBottom_toTopOf="@id/fd_name"
             app:layout_constraintHeight_percent="0.45"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.85" />
 
-        <include
-            android:id="@+id/include_food_name"
-            layout="@layout/include_food_info"
-            android:visibility="invisible"
+        <kr.ryan.myfoodcalorie.customview.FoodDescriptionView
+            android:id="@+id/fd_name"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/include_food_people"
+            Visible="@{viewModel.foodInfoVisible}"
+            app:layout_constraintBottom_toTopOf="@id/fd_people"
             app:layout_constraintHeight_percent="0.15"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_food_image"
-            app:layout_constraintWidth_percent="0.85" />
+            app:layout_constraintWidth_percent="0.85"/>
 
-        <include
-            android:id="@+id/include_food_people"
-            layout="@layout/include_food_info"
+        <kr.ryan.myfoodcalorie.customview.FoodDescriptionView
+            android:id="@+id/fd_people"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@id/include_food_calorie"
+            Visible="@{viewModel.foodInfoVisible}"
+            app:layout_constraintBottom_toTopOf="@id/fd_calorie"
             app:layout_constraintHeight_percent="0.15"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/include_food_name"
-            app:layout_constraintWidth_percent="0.85" />
+            app:layout_constraintTop_toBottomOf="@id/fd_name"
+            app:layout_constraintWidth_percent="0.85"/>
 
-        <include
-            android:id="@+id/include_food_calorie"
-            layout="@layout/include_food_info"
+        <kr.ryan.myfoodcalorie.customview.FoodDescriptionView
+            android:id="@+id/fd_calorie"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:visibility="invisible"
+            Visible="@{viewModel.foodInfoVisible}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.15"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/include_food_people"
-            app:layout_constraintWidth_percent="0.85" />
-
+            app:layout_constraintTop_toBottomOf="@id/fd_people"
+            app:layout_constraintWidth_percent="0.85"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

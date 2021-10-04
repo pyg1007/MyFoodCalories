@@ -3,16 +3,12 @@ package kr.ryan.myfoodcalorie.ui.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -41,7 +37,7 @@ import java.io.FileOutputStream
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
-    companion object{
+    companion object {
         const val FILE_NAME = "photo.jpg"
         const val APP_NAME = "Food"
     }
@@ -71,6 +67,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             whenCreated {
                 initBinding()
                 selectImage()
+
+                observeFoodName()
+                observeFoodPeople()
+                observeFoodCalorie()
             }
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -82,7 +82,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun initBinding(){
+    private fun initBinding() {
         binding.apply {
             viewModel = foodImageMachineLeaningViewModel
             lifecycleOwner = this@MainActivity
@@ -94,25 +94,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         binding.ivFoodImage.setOnClickListener {
             CoroutineScope(Dispatchers.Default).launch {
                 requireTedPermission({
+                    TedRxBottomPicker.with(this@MainActivity)
+                        .show()
+                        .subscribe({ uri ->
 
-                    saveBitmapToFile((ResourcesCompat.getDrawable(resources, R.drawable.babgook, null) as? BitmapDrawable)?.bitmap)?.let {
-                        fileToMultipartBody(it)?.let {body->
-                            foodImageMachineLeaningViewModel.requestMachineLeaning(body)
-                        }
-                    }
-
-//                    TedRxBottomPicker.with(this@MainActivity)
-//                        .show()
-//                        .subscribe({ uri ->
-//
-//                            uriToFile(uri)?.let {
-//                                fileToMultipartBody(it)?.let {body->
-//                                    foodImageMachineLeaningViewModel.requestMachineLeaning(body)
-//                                }
-//                                showFoodImage(it)
-//                                Timber.d(it.toString())
-//                            }
-//                        }, Throwable::printStackTrace)
+                            uriToFile(uri)?.let {
+                                fileToMultipartBody(it)?.let { body ->
+                                    foodImageMachineLeaningViewModel.requestMachineLeaning(body)
+                                }
+                                showFoodImage(it)
+                                Timber.d(it.toString())
+                            }
+                        }, Throwable::printStackTrace)
                 }, {
 
                 }, *permissions)
@@ -121,7 +114,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun saveBitmapToFile(bitmap: Bitmap?): File?{
+    private fun saveBitmapToFile(bitmap: Bitmap?): File? {
         return runCatching {
             val mediaFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_NAME)
             if (!mediaFile.exists() and !mediaFile.mkdirs()) {
@@ -155,31 +148,60 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
 
+    private fun observeFoodName() = CoroutineScope(Dispatchers.Main).launch {
+        foodImageMachineLeaningViewModel.foodTitle.collect {
+            binding.fdName.setDescription(resources.getString(R.string.title), it)
+        }
+    }
+
+    private fun observeFoodPeople() = CoroutineScope(Dispatchers.Main).launch {
+        foodImageMachineLeaningViewModel.foodPeople.collect {
+            binding.fdPeople.setDescription(resources.getString(R.string.people), it)
+        }
+    }
+
+    private fun observeFoodCalorie() = CoroutineScope(Dispatchers.Main).launch {
+        foodImageMachineLeaningViewModel.foodCalorie.collect {
+            binding.fdCalorie.setDescription(resources.getString(R.string.calorie), it)
+        }
+    }
+
     private suspend fun observeNetWorkResult() {
         foodImageMachineLeaningViewModel.networkStatus.collect {
             when (it) {
                 is NetWorkResult.Loading -> {
+                    Timber.d("Loading")
                     showLoadingDialog()
                 }
                 is NetWorkResult.ApiError -> {
                     Timber.d("${it.code} ${it.message}")
                     dismissLoadingDialog()
+                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage(it.code, it.message)
                 }
                 is NetWorkResult.NetWorkError -> {
                     Timber.d(it.throwable.message.toString())
                     dismissLoadingDialog()
+                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage(it.throwable.message.toString())
                 }
                 is NetWorkResult.NullResult -> {
                     Timber.d("Result is Null")
                     dismissLoadingDialog()
+                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage("Result is Null")
                 }
                 is NetWorkResult.Success -> {
-                    it.data.data?.forEach { machineLeaning->
+                    it.data.data?.forEach { machineLeaning ->
+                        foodImageMachineLeaningViewModel.run {
+                            changeFoodTitle(machineLeaning.name)
+                            changeFoodPeople(machineLeaning.people.toString())
+                            changeFoodCalorie(machineLeaning.calorie.toString())
+                        }
+                        foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                         Timber.d("${machineLeaning.name} ${machineLeaning.people} ${machineLeaning.calorie}")
                     }
+                    Timber.d("Success")
                     dismissLoadingDialog()
                 }
                 else -> {
