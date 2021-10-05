@@ -176,19 +176,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 is NetWorkResult.ApiError -> {
                     Timber.d("${it.code} ${it.message}")
                     dismissLoadingDialog()
-                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage(it.code, it.message)
                 }
                 is NetWorkResult.NetWorkError -> {
                     Timber.d(it.throwable.message.toString())
                     dismissLoadingDialog()
-                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage(it.throwable.message.toString())
                 }
                 is NetWorkResult.NullResult -> {
                     Timber.d("Result is Null")
                     dismissLoadingDialog()
-                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     showToastMessage("Result is Null")
                 }
                 is NetWorkResult.Success -> {
