@@ -45,19 +45,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private val foodImageMachineLeaningViewModel by viewModels<FoodImageMachineLeaningViewModel>()
 
     private val permissions by lazy {
-
-        when {
-            Build.VERSION.SDK_INT <= 29 -> {
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-            Build.VERSION.SDK_INT >= 30 -> {
-                arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-            }
-            else -> {
-                throw IllegalStateException("Unknown Sdk Version")
-            }
-        }
-
+        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
     init {
