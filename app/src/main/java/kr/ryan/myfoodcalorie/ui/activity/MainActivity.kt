@@ -2,12 +2,14 @@ package kr.ryan.myfoodcalorie.ui.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -77,28 +79,40 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    @SuppressLint("CheckResult")
+    private fun checkCameraHardware(): Boolean{
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+    }
+
     private fun selectImage() {
         binding.ivFoodImage.setOnClickListener {
             CoroutineScope(Dispatchers.Default).launch {
-                requireTedPermission({
-                    TedRxBottomPicker.with(this@MainActivity)
-                        .show()
-                        .subscribe({ uri ->
-
-                            uriToFile(uri)?.let {
-                                fileToMultipartBody(it)?.let { body ->
-                                    foodImageMachineLeaningViewModel.requestMachineLeaning(body)
-                                }
-                                showFoodImage(it)
-                                Timber.d(it.toString())
-                            }
-                        }, Throwable::printStackTrace)
-                }, {
-
-                }, *permissions)
-
+                if(Build.VERSION.SDK_INT <= 29) {
+                    takeCaptureOrSelectImageUnderApi()
+                }else{
+                    takeCaptureOrSelectImageHigherApi()
+                }
             }
+        }
+    }
+
+    private suspend fun takeCaptureOrSelectImageUnderApi(){
+        requireTedPermission({
+            if (checkCameraHardware()) {
+
+            } else {
+                showLogMessage("this Device haven't CameraHardware")
+            }
+        }, {
+            showLogMessage("Permission Denied")
+        }, *permissions)
+    }
+
+    @SuppressLint("CheckResult")
+    private fun takeCaptureOrSelectImageHigherApi(){
+        if (checkCameraHardware()) {
+
+        } else {
+            showLogMessage("this Device haven't CameraHardware")
         }
     }
 
@@ -158,21 +172,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         foodImageMachineLeaningViewModel.networkStatus.collect {
             when (it) {
                 is NetWorkResult.Loading -> {
-                    Timber.d("Loading")
+                    showLogMessage("Loading")
                     showLoadingDialog()
                 }
                 is NetWorkResult.ApiError -> {
-                    Timber.d("${it.code} ${it.message}")
+                    showLogMessage("${it.code} ${it.message}")
                     dismissLoadingDialog()
                     showToastMessage(it.code, it.message)
                 }
                 is NetWorkResult.NetWorkError -> {
-                    Timber.d(it.throwable.message.toString())
+                    showLogMessage(it.throwable.message.toString())
                     dismissLoadingDialog()
                     showToastMessage(it.throwable.message.toString())
                 }
                 is NetWorkResult.NullResult -> {
-                    Timber.d("Result is Null")
+                    showLogMessage("Result is Null")
                     dismissLoadingDialog()
                     showToastMessage("Result is Null")
                 }
@@ -184,12 +198,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                             changeFoodCalorie(machineLeaning.calorie.toString())
                         }
                         foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
-                        Timber.d("${machineLeaning.name} ${machineLeaning.people} ${machineLeaning.calorie}")
+                        showLogMessage("${machineLeaning.name} ${machineLeaning.people} ${machineLeaning.calorie}")
                     }
-                    Timber.d("Success")
+                    showLogMessage("Success")
                     dismissLoadingDialog()
                 }
                 else -> {
+                    showLogMessage("Init")
                 }
             }
         }
