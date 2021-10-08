@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="kr.ryan.myfoodcalorie.viewmodel.SelectViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root_const_layout"
+        android:background="@drawable/bottom_sheet_dialog_fragment_select_round"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ImageView
+            android:id="@+id/iv_camera"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/outline"
+            android:src="@drawable/photo_camera"
+            android:onClick="@{() -> viewModel.onClickCamera()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="0.8"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/iv_gallery"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.45" />
+
+        <ImageView
+            android:id="@+id/iv_gallery"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/outline"
+            android:src="@drawable/photo"
+            android:onClick="@{() -> viewModel.onClickGallery()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent="0.8"
+            app:layout_constraintLeft_toRightOf="@id/iv_camera"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.45" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

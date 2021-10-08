@@ -26,6 +26,7 @@ import kr.ryan.baseui.BaseActivity
 import kr.ryan.myfoodcalorie.R
 import kr.ryan.myfoodcalorie.databinding.ActivityMainBinding
 import kr.ryan.myfoodcalorie.ui.dialogfragment.LoadingDialogFragment
+import kr.ryan.myfoodcalorie.ui.dialogfragment.bottomsheet.SelectBottomSheetDialogFragment
 import kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
 import kr.ryan.tedpermissionmodule.requireTedPermission
@@ -98,7 +99,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private suspend fun takeCaptureOrSelectImageUnderApi(){
         requireTedPermission({
             if (checkCameraHardware()) {
-
+                showSelectBottomSheetDialog()
             } else {
                 showLogMessage("this Device haven't CameraHardware")
             }
@@ -110,10 +111,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     @SuppressLint("CheckResult")
     private fun takeCaptureOrSelectImageHigherApi(){
         if (checkCameraHardware()) {
-
+            showSelectBottomSheetDialog()
         } else {
             showLogMessage("this Device haven't CameraHardware")
         }
+    }
+
+    private fun showSelectBottomSheetDialog(){
+        SelectBottomSheetDialogFragment.newInstance({
+            showLogMessage("Camera")
+        },{
+            showLogMessage("Gallery")
+        }).show(supportFragmentManager, "Select")
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap?): File? {
