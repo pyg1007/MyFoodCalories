@@ -1,23 +1,24 @@
 package kr.ryan.myfoodcalorie.ui.activity
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.core.net.toUri
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.whenCreated
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
-import gun0912.tedbottompicker.TedRxBottomPicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -51,14 +52,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
+    private lateinit var captureImageLauncher: ActivityResultLauncher<Intent>
+    private var imageFile: File? = null
+
     init {
 
         lifecycleScope.launch {
 
             whenCreated {
+                initLauncher()
                 initBinding()
                 selectImage()
-
                 observeFoodName()
                 observeFoodPeople()
                 observeFoodCalorie()
@@ -73,6 +77,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
+    private fun initLauncher() {
+        captureImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                imageFile?.let { file ->
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val param = MultipartBody.Part.createFormData("data", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull()))
+                        foodImageMachineLeaningViewModel.requestMachineLeaning(param)
+                    }
+                }
+            }
+        }
+    }
+
     private fun initBinding() {
         binding.apply {
             viewModel = foodImageMachineLeaningViewModel
@@ -80,23 +97,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun checkCameraHardware(): Boolean{
+    private fun checkCameraHardware(): Boolean {
         return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
     }
 
     private fun selectImage() {
         binding.ivFoodImage.setOnClickListener {
             CoroutineScope(Dispatchers.Default).launch {
-                if(Build.VERSION.SDK_INT <= 29) {
+                if (Build.VERSION.SDK_INT <= 29) {
                     takeCaptureOrSelectImageUnderApi()
-                }else{
+                } else {
                     takeCaptureOrSelectImageHigherApi()
                 }
             }
         }
     }
 
-    private suspend fun takeCaptureOrSelectImageUnderApi(){
+    private suspend fun takeCaptureOrSelectImageUnderApi() {
         requireTedPermission({
             if (checkCameraHardware()) {
                 showSelectBottomSheetDialog()
@@ -108,8 +125,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }, *permissions)
     }
 
-    @SuppressLint("CheckResult")
-    private fun takeCaptureOrSelectImageHigherApi(){
+    private fun takeCaptureOrSelectImageHigherApi() {
         if (checkCameraHardware()) {
             showSelectBottomSheetDialog()
         } else {
@@ -117,12 +133,40 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun showSelectBottomSheetDialog(){
+    private fun showSelectBottomSheetDialog() {
         SelectBottomSheetDialogFragment.newInstance({
+            openCamera()
             showLogMessage("Camera")
-        },{
+        }, {
             showLogMessage("Gallery")
         }).show(supportFragmentManager, "Select")
+    }
+
+    private fun openCamera() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { captureIntent ->
+            captureIntent.resolveActivity(packageManager)?.also {
+                imageFile = getFileUri()
+                imageFile?.let {
+                    val provider = FileProvider.getUriForFile(
+                        this@MainActivity,
+                        "kr.ryan.myfoodcalorie.fileprovider",
+                        it
+                    )
+                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, provider)
+                    captureImageLauncher.launch(captureIntent)
+                }
+            }
+        }
+    }
+
+    private fun getFileUri(): File? {
+        return runCatching {
+            val mediaFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_NAME)
+            if (!mediaFile.exists() and !mediaFile.mkdirs()) {
+                Timber.d("Fail Create File")
+            }
+            File(mediaFile.path + File.separator + FILE_NAME)
+        }.getOrNull()
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap?): File? {
