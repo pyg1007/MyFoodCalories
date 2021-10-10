@@ -149,9 +149,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 imageFile?.let {
                     val provider = FileProvider.getUriForFile(
                         this@MainActivity,
-                        "kr.ryan.myfoodcalorie.fileprovider",
+                        "kr.ryan.myfoodcalorie.provider",
                         it
                     )
+
+                    grantUriPermission(packageName, provider, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
                     captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, provider)
                     captureImageLauncher.launch(captureIntent)
                 }
