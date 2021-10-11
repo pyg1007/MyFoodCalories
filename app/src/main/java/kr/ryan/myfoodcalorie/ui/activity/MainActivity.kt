@@ -153,8 +153,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         it
                     )
 
-                    grantUriPermission(packageName, provider, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    //contentResolver.takePersistableUriPermission(provider, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
 
+                    for (resolveInfo in packageManager.queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY))
+                        grantUriPermission(resolveInfo.activityInfo.packageName, provider, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, provider)
                     captureImageLauncher.launch(captureIntent)
                 }
