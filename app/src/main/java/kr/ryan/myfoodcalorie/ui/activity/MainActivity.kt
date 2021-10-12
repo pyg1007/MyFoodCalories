@@ -104,28 +104,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private fun selectImage() {
         binding.ivFoodImage.setOnClickListener {
             CoroutineScope(Dispatchers.Default).launch {
-                if (Build.VERSION.SDK_INT <= 29) {
-                    takeCaptureOrSelectImageUnderApi()
-                } else {
-                    takeCaptureOrSelectImageHigherApi()
-                }
+                takeCaptureOrSelectImage()
             }
         }
     }
 
-    private suspend fun takeCaptureOrSelectImageUnderApi() {
-        requireTedPermission({
-            if (checkCameraHardware()) {
-                showSelectBottomSheetDialog()
-            } else {
-                showLogMessage("this Device haven't CameraHardware")
-            }
-        }, {
-            showLogMessage("Permission Denied")
-        }, *permissions)
-    }
-
-    private fun takeCaptureOrSelectImageHigherApi() {
+    private fun takeCaptureOrSelectImage() {
         if (checkCameraHardware()) {
             showSelectBottomSheetDialog()
         } else {
@@ -153,10 +137,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         it
                     )
 
-                    //contentResolver.takePersistableUriPermission(provider, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-                    for (resolveInfo in packageManager.queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY))
-                        grantUriPermission(resolveInfo.activityInfo.packageName, provider, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, provider)
                     captureImageLauncher.launch(captureIntent)
                 }
