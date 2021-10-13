@@ -154,36 +154,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }.getOrNull()
     }
 
-    private fun saveBitmapToFile(bitmap: Bitmap?): File? {
-        return runCatching {
-            val mediaFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_NAME)
-            if (!mediaFile.exists() and !mediaFile.mkdirs()) {
-                Timber.d("Fail Create File")
-            }
-            val file = File(mediaFile.path + File.separator + FILE_NAME)
-            file.createNewFile()
-            val outputStream = FileOutputStream(file)
-            bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-            file
-        }.getOrNull()
-    }
-
-    private fun uriToFile(uri: Uri): File? {
-        return runCatching {
-            File(uri.path.toString())
-        }.getOrNull()
-    }
-
-    private fun fileToMultipartBody(file: File): MultipartBody.Part? {
-        return runCatching {
-            MultipartBody.Part.createFormData(
-                "data",
-                file.name,
-                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            )
-        }.getOrNull()
-    }
-
     private fun showFoodImage(uri: File) = CoroutineScope(Dispatchers.Main).launch {
         Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
