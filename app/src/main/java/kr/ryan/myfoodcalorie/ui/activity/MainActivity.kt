@@ -1,11 +1,10 @@
 package kr.ryan.myfoodcalorie.ui.activity
 
 import android.Manifest
+import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
-import android.os.Build
+import android.database.Cursor
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
@@ -30,13 +29,11 @@ import kr.ryan.myfoodcalorie.ui.dialogfragment.LoadingDialogFragment
 import kr.ryan.myfoodcalorie.ui.dialogfragment.bottomsheet.SelectBottomSheetDialogFragment
 import kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
-import kr.ryan.tedpermissionmodule.requireTedPermission
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import timber.log.Timber
 import java.io.File
-import java.io.FileOutputStream
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
@@ -78,16 +75,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private fun initLauncher() {
-        captureImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                imageFile?.let { file ->
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val param = MultipartBody.Part.createFormData("data", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull()))
-                        foodImageMachineLeaningViewModel.requestMachineLeaning(param)
+        captureImageLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    imageFile?.let { file ->
+                        CoroutineScope(Dispatchers.Default).launch {
+                            val param = MultipartBody.Part.createFormData(
+                                "data",
+                                file.name,
+                                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                            )
+                            foodImageMachineLeaningViewModel.requestMachineLeaning(param)
+                        }
                     }
                 }
             }
-        }
     }
 
     private fun initBinding() {
@@ -122,6 +124,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             openCamera()
             showLogMessage("Camera")
         }, {
+            openGallery()
             showLogMessage("Gallery")
         }).show(supportFragmentManager, "Select")
     }
@@ -144,11 +147,39 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
+    private fun openGallery() {
+        runCatching {
+            val cursor = getImage()
+            showLogMessage("$cursor")
+            cursor?.let {
+                if (it.moveToFirst()) {
+                    val id =
+                        it.getLong(it.getColumnIndexOrThrow(MediaStore.Images.ImageColumns._ID))
+                    showLogMessage("${ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)}")
+                } else {
+                    showLogMessage("Empty Image File")
+                }
+            }
+            cursor?.close()
+        }.onFailure {
+            showLogMessage("$it")
+        }
+    }
+
+    private fun getImage(): Cursor? = contentResolver.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter("limit", "1")
+            .build(), arrayOf(
+            MediaStore.Images.ImageColumns._ID,
+            MediaStore.Images.ImageColumns.TITLE,
+            MediaStore.Images.ImageColumns.DATE_TAKEN
+        ), null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC"
+    )
+
     private fun getFileUri(): File? {
         return runCatching {
             val mediaFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_NAME)
             if (!mediaFile.exists() and !mediaFile.mkdirs()) {
-                Timber.d("Fail Create File")
+                showLogMessage("Fail Create File")
             }
             File(mediaFile.path + File.separator + FILE_NAME)
         }.getOrNull()
@@ -186,17 +217,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 is NetWorkResult.ApiError -> {
                     showLogMessage("${it.code} ${it.message}")
                     dismissLoadingDialog()
-                    showToastMessage(it.code, it.message)
                 }
                 is NetWorkResult.NetWorkError -> {
                     showLogMessage(it.throwable.message.toString())
                     dismissLoadingDialog()
-                    showToastMessage(it.throwable.message.toString())
                 }
                 is NetWorkResult.NullResult -> {
-                    showLogMessage("Result is Null")
                     dismissLoadingDialog()
-                    showToastMessage("Result is Null")
                 }
                 is NetWorkResult.Success -> {
                     it.data.data?.forEach { machineLeaning ->
@@ -208,7 +235,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                         showLogMessage("${machineLeaning.name} ${machineLeaning.people} ${machineLeaning.calorie}")
                     }
-                    showLogMessage("Success")
                     dismissLoadingDialog()
                 }
                 else -> {
