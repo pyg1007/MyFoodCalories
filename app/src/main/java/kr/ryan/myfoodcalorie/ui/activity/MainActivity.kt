@@ -5,6 +5,8 @@ import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
@@ -12,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.FileProvider
+import androidx.core.net.toFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,6 +32,8 @@ import kr.ryan.myfoodcalorie.ui.dialogfragment.LoadingDialogFragment
 import kr.ryan.myfoodcalorie.ui.dialogfragment.bottomsheet.SelectBottomSheetDialogFragment
 import kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
+import kr.ryan.tedpermissionmodule.checkTedPermission
+import kr.ryan.tedpermissionmodule.requireTedPermission
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -50,6 +55,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private lateinit var captureImageLauncher: ActivityResultLauncher<Intent>
+    private lateinit var bringGalleryImageLauncher: ActivityResultLauncher<Intent>
     private var imageFile: File? = null
 
     init {
@@ -57,7 +63,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         lifecycleScope.launch {
 
             whenCreated {
-                initLauncher()
+                initCaptureLauncher()
+                initBringLauncher()
                 initBinding()
                 selectImage()
                 observeFoodName()
@@ -74,7 +81,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }
     }
 
-    private fun initLauncher() {
+    private fun initCaptureLauncher() {
         captureImageLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
@@ -90,6 +97,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     }
                 }
             }
+    }
+
+    private fun initBringLauncher() {
+        bringGalleryImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result->
+            if (result.resultCode == RESULT_OK){
+                result.data?.data?.let {
+                    val file = it.toFile()
+                    val param = MultipartBody.Part.createFormData("data", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull()))
+                    foodImageMachineLeaningViewModel.requestMachineLeaning(param)
+                    //showFoodImage(it)
+                    //showLogMessage("$it")
+                }
+
+            }
+        }
     }
 
     private fun initBinding() {
@@ -148,32 +170,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private fun openGallery() {
-        runCatching {
-            val cursor = getImage()
-            showLogMessage("$cursor")
-            cursor?.let {
-                if (it.moveToFirst()) {
-                    val id =
-                        it.getLong(it.getColumnIndexOrThrow(MediaStore.Images.ImageColumns._ID))
-                    showLogMessage("${ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)}")
-                } else {
-                    showLogMessage("Empty Image File")
-                }
-            }
-            cursor?.close()
-        }.onFailure {
-            showLogMessage("$it")
+        Intent(Intent.ACTION_GET_CONTENT).also {
+            it.type = "image/*"
+            bringGalleryImageLauncher.launch(it)
         }
     }
-
-    private fun getImage(): Cursor? = contentResolver.query(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter("limit", "1")
-            .build(), arrayOf(
-            MediaStore.Images.ImageColumns._ID,
-            MediaStore.Images.ImageColumns.TITLE,
-            MediaStore.Images.ImageColumns.DATE_TAKEN
-        ), null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC"
-    )
 
     private fun getFileUri(): File? {
         return runCatching {
@@ -185,7 +186,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }.getOrNull()
     }
 
-    private fun showFoodImage(uri: File) = CoroutineScope(Dispatchers.Main).launch {
+    private fun showFoodImage(file: File){
+        Glide.with(this@MainActivity).load(file).into(binding.ivFoodImage)
+    }
+
+    private fun showFoodImage(uri: Uri){
         Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
 
