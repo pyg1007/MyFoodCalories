@@ -1,12 +1,7 @@
 package kr.ryan.myfoodcalorie.ui.activity
 
-import android.Manifest
-import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
@@ -32,8 +27,6 @@ import kr.ryan.myfoodcalorie.ui.dialogfragment.LoadingDialogFragment
 import kr.ryan.myfoodcalorie.ui.dialogfragment.bottomsheet.SelectBottomSheetDialogFragment
 import kr.ryan.myfoodcalorie.viewmodel.FoodImageMachineLeaningViewModel
 import kr.ryan.retrofitmodule.NetWorkResult
-import kr.ryan.tedpermissionmodule.checkTedPermission
-import kr.ryan.tedpermissionmodule.requireTedPermission
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -49,10 +42,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private val foodImageMachineLeaningViewModel by viewModels<FoodImageMachineLeaningViewModel>()
-
-    private val permissions by lazy {
-        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    }
 
     private lateinit var captureImageLauncher: ActivityResultLauncher<Intent>
     private lateinit var bringGalleryImageLauncher: ActivityResultLauncher<Intent>
@@ -100,18 +89,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     private fun initBringLauncher() {
-        bringGalleryImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result->
-            if (result.resultCode == RESULT_OK){
-                result.data?.data?.let {
-                    val file = it.toFile()
-                    val param = MultipartBody.Part.createFormData("data", file.name, file.asRequestBody("multipart/form-data".toMediaTypeOrNull()))
-                    foodImageMachineLeaningViewModel.requestMachineLeaning(param)
-                    //showFoodImage(it)
-                    //showLogMessage("$it")
-                }
+        bringGalleryImageLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    result.data?.data?.let {
+                        imageFile = it.toFile()
+                        imageFile?.let { file ->
+                            val param = MultipartBody.Part.createFormData(
+                                "data",
+                                file.name,
+                                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                            )
+                            foodImageMachineLeaningViewModel.requestMachineLeaning(param)
+                        }
+                    }
 
+                }
             }
-        }
     }
 
     private fun initBinding() {
@@ -186,12 +180,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         }.getOrNull()
     }
 
-    private fun showFoodImage(file: File){
+    private fun showFoodImage(file: File) {
         Glide.with(this@MainActivity).load(file).into(binding.ivFoodImage)
-    }
-
-    private fun showFoodImage(uri: Uri){
-        Glide.with(this@MainActivity).load(uri).into(binding.ivFoodImage)
     }
 
     private fun observeFoodName() = CoroutineScope(Dispatchers.Main).launch {
