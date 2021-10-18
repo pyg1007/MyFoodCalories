@@ -3,6 +3,8 @@ package kr.ryan.myfoodcalorie.ui.activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -30,8 +32,11 @@ import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.internal.http2.Http2Reader
 import timber.log.Timber
 import java.io.File
+import kotlin.math.ceil
+import kotlin.math.floor
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
@@ -211,25 +216,41 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 }
                 is NetWorkResult.ApiError -> {
                     showLogMessage("${it.code} ${it.message}")
+                    showToastMessage(it.code, it.message)
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.NetWorkError -> {
                     showLogMessage(it.throwable.message.toString())
+                    showToastMessage(it.throwable.message.toString())
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.NullResult -> {
+                    showToastMessage("Result is null")
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.Success -> {
-                    it.data.data?.forEach { machineLeaning ->
+                    it.data.data?.let{ machineLeaning->
                         foodImageMachineLeaningViewModel.run {
-                            changeFoodTitle(machineLeaning.name)
-                            changeFoodPeople(machineLeaning.people.toString())
-                            changeFoodCalorie(machineLeaning.calorie.toString())
+                            var people = 0
+                            var calorie = 0
+                            machineLeaning.forEach { remote ->
+                                people += remote.people
+                                remote.calorie?.let {cal->
+                                    calorie += cal.toInt()
+                                }
+                            }
+
+                            changeFoodTitle(machineLeaning.joinToString(", ") { join -> join.name })
+                            changeFoodPeople("${floor(people.toDouble()).toInt()} ~ ${ceil(people.toDouble()).toInt()}")
+                            changeFoodCalorie(calorie.toString())
                         }
-                        foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
-                        showLogMessage("${machineLeaning.name} ${machineLeaning.people} ${machineLeaning.calorie}")
                     }
+
+                    imageFile?.let {file->
+                        showFoodImage(file)
+                    }
+
+                    foodImageMachineLeaningViewModel.changeFoodInfoVisible(true)
                     dismissLoadingDialog()
                 }
                 else -> {
