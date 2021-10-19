@@ -2,16 +2,14 @@ package kr.ryan.myfoodcalorie.ui.activity
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.FileProvider
-import androidx.core.net.toFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,9 +30,9 @@ import kr.ryan.retrofitmodule.NetWorkResult
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.internal.http2.Http2Reader
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -80,17 +78,38 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     imageFile?.let { file ->
-                        CoroutineScope(Dispatchers.Default).launch {
-                            val param = MultipartBody.Part.createFormData(
-                                "data",
-                                file.name,
-                                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-                            )
-                            foodImageMachineLeaningViewModel.requestMachineLeaning(param)
-                        }
+                        val param = MultipartBody.Part.createFormData(
+                            "data",
+                            file.name,
+                            file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                        )
+                        foodImageMachineLeaningViewModel.requestMachineLeaning(param)
                     }
                 }
             }
+    }
+
+    private fun convertContentUriToFileUri(contentUri: Uri): File? {
+
+        imageFile = getFileUri()
+
+        return runCatching {
+            val inputStream = contentResolver.openInputStream(contentUri)
+            val fileOutputStream = FileOutputStream(imageFile)
+            val buffer = ByteArray(4096)
+            inputStream?.let {
+                var length = it.read(buffer)
+                while (length > 0) {
+                    fileOutputStream.write(buffer, 0, length)
+                    length = it.read(buffer)
+                }
+                fileOutputStream.flush()
+            }
+            imageFile
+        }.onFailure {
+            showLogMessage(it.message.toString())
+        }.getOrNull()
+
     }
 
     private fun initBringLauncher() {
@@ -98,8 +117,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     result.data?.data?.let {
-                        imageFile = it.toFile()
-                        imageFile?.let { file ->
+                        showLogMessage(it.path!!)
+                        convertContentUriToFileUri(it)?.let { file ->
                             val param = MultipartBody.Part.createFormData(
                                 "data",
                                 file.name,
@@ -108,7 +127,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                             foodImageMachineLeaningViewModel.requestMachineLeaning(param)
                         }
                     }
-
                 }
             }
     }
@@ -229,13 +247,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.Success -> {
-                    it.data.data?.let{ machineLeaning->
+                    it.data.data?.let { machineLeaning ->
                         foodImageMachineLeaningViewModel.run {
                             var people = 0
                             var calorie = 0
                             machineLeaning.forEach { remote ->
                                 people += remote.people
-                                remote.calorie?.let {cal->
+                                remote.calorie?.let { cal ->
                                     calorie += cal.toInt()
                                 }
                             }
@@ -246,7 +264,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         }
                     }
 
-                    imageFile?.let {file->
+                    imageFile?.let { file ->
                         showFoodImage(file)
                     }
 
