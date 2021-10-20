@@ -243,24 +243,35 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.NullResult -> {
+                    showLogMessage("Result is null")
                     showToastMessage("Result is null")
                     dismissLoadingDialog()
                 }
                 is NetWorkResult.Success -> {
+                    showLogMessage("Success")
                     it.data.data?.let { machineLeaning ->
                         foodImageMachineLeaningViewModel.run {
-                            var people = 0
+                            var people = 0.0
                             var calorie = 0
                             machineLeaning.forEach { remote ->
                                 people += remote.people
                                 remote.calorie?.let { cal ->
-                                    calorie += cal.toInt()
+                                    runCatching {
+                                        calorie += cal.replace("kcal", "").toInt()
+                                    }.onFailure { throwable->
+                                        showLogMessage(throwable.message.toString())
+                                    }
                                 }
                             }
 
+                            people /= machineLeaning.size
+
                             changeFoodTitle(machineLeaning.joinToString(", ") { join -> join.name })
-                            changeFoodPeople("${floor(people.toDouble()).toInt()} ~ ${ceil(people.toDouble()).toInt()}")
-                            changeFoodCalorie(calorie.toString())
+                            if (floor(people) == ceil(people))
+                                changeFoodPeople("${people.toInt()} 인분")
+                            else
+                                changeFoodPeople("${floor(people).toInt()} ~ ${ceil(people).toInt()} 인분")
+                            changeFoodCalorie(calorie.toString() + "kcal")
                         }
                     }
 

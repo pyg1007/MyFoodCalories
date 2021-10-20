@@ -40,7 +40,7 @@ class FoodImageMachineLeaningViewModel @Inject constructor(
     private val _networkStatus = MutableStateFlow<NetWorkResult<RootRemoteMachineLeaning>>(NetWorkResult.Init())
     val networkStatus = _networkStatus.asStateFlow()
 
-    fun requestMachineLeaning(param: MultipartBody.Part) = viewModelScope.launch{
+    fun requestMachineLeaning(param: MultipartBody.Part) = viewModelScope.launch {
         _networkStatus.emit(NetWorkResult.Loading())
         val result = machineLeaningUseCase.provideMachineLeaningResult(param)
         _networkStatus.emit(result)
@@ -58,7 +58,7 @@ class FoodImageMachineLeaningViewModel @Inject constructor(
         _foodCalorie.emit(calorie)
     }
 
-    fun changeFoodInfoVisible(visible: Boolean) = viewModelScope.launch{
+    fun changeFoodInfoVisible(visible: Boolean) = viewModelScope.launch {
         _foodInfoVisible.emit(visible)
     }
 
