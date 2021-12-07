@@ -51,6 +51,6 @@ for food in food_names:
 new_df = pd.DataFrame({"fid":food_ids.to_list(),"name":food_names.to_list(), "cal":cal_list})
 
         
-new_df.to_csv("food_cals.csv")
+new_df.to_csv("../data/food_cals.csv")
 
 driver.close()

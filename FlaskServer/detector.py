@@ -1,13 +1,10 @@
-import sys
-sys.path.append("./yolov3")
-from models import *
-from utils.utils import *
+from yolov3.models import *
+from yolov3.utils.utils import *
 import cv2
 import pandas as pd
     
 import torch
 import numpy as np
-import glob
 from PIL import Image
 from torchvision import datasets, models, transforms
 from torch.autograd import Variable
@@ -16,12 +13,12 @@ import torch.nn.functional as F
 
 class Detector:
     def __init__(self):
-        self.cfg = "./yolov3/cfg/yolov3-spp-403cls.cfg"
-        self.weights = "./yolov3/weights/best_403food_e200b150v2.pt"
-        self.names = "./yolov3/data/403food.names"
+        self.cfg = "data/cfg/yolov3-spp-403cls.cfg"
+        self.weights = "data/weights/best_403food_e200b150v2.pt"
+        self.names = "data/cfg/403food.names"
         self.imgsz = (320, 192)
         
-        df = pd.read_excel("food_name.xlsx")
+        df = pd.read_excel("data/excel/food_name.xlsx")
         food_dict = {'00000000':"dish"}
         food_ids = list(df.iloc[1:,-2])
         food_names = list(df.iloc[1:,-1])
@@ -29,7 +26,7 @@ class Detector:
             food_dict[i] = n.replace(" ","")
 
 
-        cal_df = pd.read_csv("food_cals.csv",index_col=0)
+        cal_df = pd.read_csv("data/excel/food_cals.csv",index_col=0)
         self.cal_dict = {}
         
         for n,c in zip(cal_df.name, cal_df.kcal):
@@ -84,7 +81,7 @@ class Detector:
 
 
 class Quantity:
-    def __init__(self, weight_path="./quantity_est/weights/new_opencv_ckpt_b84_e200.pth"):
+    def __init__(self, weight_path="data/weights/new_opencv_ckpt_b84_e200.pth"):
         checkpoint = torch.load(weight_path,map_location="cpu")
         model = checkpoint['model_ft']
         model.load_state_dict(checkpoint['state_dict'], strict=False)
