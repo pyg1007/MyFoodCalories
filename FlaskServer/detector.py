@@ -10,7 +10,6 @@ from torchvision import datasets, models, transforms
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-
 class Detector:
     def __init__(self):
         self.cfg = "data/cfg/yolov3-spp-403cls.cfg"
@@ -18,7 +17,7 @@ class Detector:
         self.names = "data/cfg/403food.names"
         self.imgsz = (320, 192)
         
-        df = pd.read_excel("data/excel/food_name.xlsx")
+        df = pd.read_excel("data/excel/food_names.xlsx")
         food_dict = {'00000000':"dish"}
         food_ids = list(df.iloc[1:,-2])
         food_names = list(df.iloc[1:,-1])
@@ -76,10 +75,6 @@ class Detector:
         return result
                 
                 
-                
-                
-
-
 class Quantity:
     def __init__(self, weight_path="data/weights/new_opencv_ckpt_b84_e200.pth"):
         checkpoint = torch.load(weight_path,map_location="cpu")

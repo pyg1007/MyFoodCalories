@@ -19,7 +19,7 @@
 -------------------------------
     
 
-## Python Server(with DL)
+## Python Flask Server(with DL)
 
 Flask 기반 Rest-api 서버로 객체 탐지 및 분류 하여 결과를 리턴해줍니다.
 
